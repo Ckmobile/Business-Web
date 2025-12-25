@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>KD Panta Online Shop</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="navbar">
+  <h2>KD Panta Shop</h2>
+  <div class="cart-btn" onclick="openCart()">
+    🛒 Cart (<span id="count">0</span>)
+  </div>
+</div>
+
+<div class="search-box">
+  <input id="search" placeholder="🔍 Search products">
+</div>
+
+<div id="items" class="grid"></div>
+
+<!-- CART -->
+<div class="cart-modal" id="cartModal">
+  <div class="cart-box">
+    <h3>Your Cart</h3>
+    <div id="cartItems"></div>
+    <hr>
+    <b>Total: Rs <span id="total">0</span></b><br><br>
+    <button class="btn" onclick="closeCart()">Close</button>
+  </div>
+</div>
+
+<footer>
+  © 2025 KD Panta Online Shop
+</footer>
+
+<script src="script.js"></script>
+</body>
+</html>

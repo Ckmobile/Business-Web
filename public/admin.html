@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Admin Panel</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="form">
+  <h2>Add New Item</h2>
+  <input id="name" placeholder="Item Name">
+  <input id="price" placeholder="Price">
+  <input id="image" placeholder="Image URL">
+  <textarea id="desc" placeholder="Description"></textarea>
+  <button class="btn" onclick="addItem()">Add Item</button>
+</div>
+
+<br>
+
+<div class="form">
+  <h2>All Items</h2>
+  <div id="adminItems"></div>
+</div>
+
+<script>
+const adminItems = document.getElementById("adminItems")
+
+async function addItem(){
+  await fetch("/api/items",{
+    method:"POST",
+    headers:{
+      "Content-Type":"application/json",
+      "Authorization": localStorage.token
+    },
+    body:JSON.stringify({
+      name: name.value,
+      price: price.value,
+      image: image.value,
+      description: desc.value
+    })
+  })
+  clear()
+  loadItems()
+}
+
+function clear(){
+  name.value=""
+  price.value=""
+  image.value=""
+  desc.value=""
+}
+
+async function loadItems(){
+  const res = await fetch("/api/items")
+  const items = await res.json()
+
+  adminItems.innerHTML = items.map(i=>`
+    <div class="card">
+      <img src="${i.image}" width="100">
+      <h4>${i.name}</h4>
+      <b>Rs ${i.price}</b>
+      <button class="btn" onclick="deleteItem('${i._id}')">Delete</button>
+    </div>
+  `).join("")
+}
+
+async function deleteItem(id){
+  if(!confirm("Delete this item?")) return
+
+  await fetch("/api/items/"+id,{
+    method:"DELETE",
+    headers:{
+      "Authorization": localStorage.token
+    }
+  })
+  loadItems()
+}
+
+loadItems()
+</script>
+
+</body>
+</html>
