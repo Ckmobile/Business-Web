@@ -1,81 +1,119 @@
-# WhatsApp Web — Firebase Edition
+# WhatsApp Web Clone (Firebase)
 
-A professional-grade WhatsApp-inspired web client built with plain HTML, CSS and modern JavaScript modules, using Firebase Authentication, Firestore and Storage.
+A real-time, WhatsApp Web–styled chat application built with plain HTML/CSS/JS
+(ES modules, no build step) and Firebase (Authentication, Firestore, Storage).
 
-## Included
+## Features
 
-- Google + email/password authentication
-- Responsive desktop/mobile chat shell
-- Real-time chat list and Firestore message streams
-- Read/delivery state
-- Presence/last-seen model
-- Typing indicator data model
-- Replies and emoji reactions
-- Image/video/document uploads via Firebase Storage
-- Search/filter UI
-- Chat details panel
-- Status/call UI entry points
-- Security rules for users, chats, messages, groups, status and calls
-- Firebase Hosting configuration
-- Firestore composite indexes
+- Email/password authentication with profile name + avatar upload
+- One-on-one chats and group chats
+- Real-time messaging (Firestore `onSnapshot`)
+- Contact search (by name) to start new chats or build a group
+- Typing indicators
+- Online / offline status with "last seen" timestamps
+- Message read receipts (single / double / blue double tick)
+- Image and file sharing via Firebase Storage, with upload progress
+- Emoji picker
+- Delete a message "for me" or "for everyone"
+- Unread message counters per chat
+- Date separators in the message thread ("Today", "Yesterday", full date)
+- Light / dark theme toggle (persisted in localStorage)
+- Fully responsive: single-column mobile view that mirrors WhatsApp Web's
+  behavior of collapsing the sidebar behind the open chat
 
-## Firebase setup
+## Project structure
 
-1. Create a Firebase project.
-2. Enable Authentication:
-   - Google
-   - Email/Password
-3. Create a Firestore database.
-4. Enable Firebase Storage.
-5. Register a Web App and copy its configuration into `firebase-config.js`.
-6. Deploy rules/indexes:
-   ```bash
-   firebase login
-   firebase use YOUR_PROJECT_ID
-   firebase deploy --only firestore:rules,firestore:indexes,storage
+```
+whatsapp-clone/
+├── index.html
+├── css/
+│   └── style.css
+├── js/
+│   ├── firebase-config.js   # <- put your Firebase project keys here
+│   ├── auth.js               # sign up / log in / log out
+│   ├── presence.js           # online/offline + last seen
+│   ├── chats.js               # contacts, chat/group creation, chat list
+│   ├── messages.js            # send/receive/read receipts/delete, media upload
+│   └── app.js                 # DOM orchestration (the only file touching the UI)
+├── firestore.rules
+└── storage.rules
+```
+
+## Setup
+
+1. **Create a Firebase project** at https://console.firebase.google.com
+
+2. **Enable products**
+   - Authentication → Sign-in method → enable **Email/Password**
+   - Firestore Database → Create database (start in production mode)
+   - Storage → Get started
+
+3. **Register a Web App** in Project settings → General → "Your apps" → Web,
+   then copy the config object into `js/firebase-config.js`:
+
+   ```js
+   const firebaseConfig = {
+     apiKey: "...",
+     authDomain: "...",
+     projectId: "...",
+     storageBucket: "...",
+     messagingSenderId: "...",
+     appId: "...",
+   };
    ```
-7. For local development, use a static server:
+
+4. **Deploy security rules** (using the Firebase CLI):
+
+   ```bash
+   npm install -g firebase-tools
+   firebase login
+   firebase init firestore storage   # point at this project, keep default file names
+   firebase deploy --only firestore:rules,storage:rules
+   ```
+
+   Or paste the contents of `firestore.rules` / `storage.rules` directly into
+   the Firebase console's Rules editors.
+
+5. **Create the required Firestore composite index.** The chat list query
+   (`where("participants", "array-contains", uid)` + `orderBy("updatedAt", "desc")`)
+   needs a composite index. The easiest way: run the app, open the browser
+   console, and click the link Firestore prints in the error the first time
+   the query runs — it deep-links straight to an auto-filled "Create Index"
+   page. Alternatively create it manually:
+   - Collection: `chats`
+   - Fields: `participants` (Arrays), `updatedAt` (Descending)
+
+6. **Serve the app.** Because it uses ES modules, open it via a local server
+   rather than `file://`:
+
    ```bash
    npx serve .
-   ```
-   or deploy with Firebase Hosting:
-   ```bash
-   firebase deploy --only hosting
+   # or
+   python3 -m http.server 8000
    ```
 
-## Firestore data model
+   Then visit `http://localhost:8000` (or whichever port is printed).
 
-- `users/{uid}` — profile, about, avatar, online/lastSeen
-- `presence/{uid}` — live presence state
-- `chats/{chatId}` — members, lastMessage, updatedAt, unread counts
-- `chats/{chatId}/messages/{messageId}` — text/media, sender, timestamps, delivery/read state, replies, reactions
-- `groups/{groupId}` — group metadata, members, admins
-- `statuses/{statusId}` — status posts and expiration metadata
-- `typing/{chatId_uid}` — ephemeral typing state
-- `calls/{callId}` — WebRTC call metadata
-- `calls/{callId}/signals/{signalId}` — WebRTC signaling messages
-- `notifications/{uid}` — push/in-app notification queue
+## Data model
 
-## Production hardening
+See the comment block at the top of `js/firebase-config.js` for the full
+Firestore schema (`users`, `chats`, `chats/{id}/messages`) and Storage layout
+(`avatars/`, `chatMedia/`).
 
-This is a functional foundation, not a claim of feature parity with WhatsApp's proprietary backend. For production, add:
+## Notes & extension points
 
-- Phone authentication + reCAPTCHA
-- Firebase Cloud Messaging for push notifications
-- Cloud Functions for notifications, cleanup and server-side validation
-- WebRTC TURN servers and complete offer/answer/ICE signaling
-- Group-chat composer and admin controls
-- Message edit/delete/forward/pin/star/search
-- Contact discovery and QR/link-device flow
-- Status viewers/replies/expiry cleanup
-- End-to-end encryption architecture if required; Firestore rules alone are not E2EE
-- Rate limits, abuse controls, file scanning and quotas
-- App Check
-- Stronger Storage rules validating MIME types and ownership
-- Pagination/virtualized message rendering
-- Offline persistence and conflict handling
-- Analytics, crash reporting and automated tests
-
-## Important
-
-Do not put Firebase Admin SDK service-account credentials in `firebase-config.js`. Browser Firebase configuration values are identifiers, but access control must be enforced by Authentication + Firestore/Storage Security Rules.
+- **Presence** is approximated with Firestore heartbeats/visibility events
+  (see comments in `presence.js`). For instant, connection-accurate presence
+  the standard approach is to mirror it through the Realtime Database's
+  native `onDisconnect()` hook and sync that into Firestore with a small
+  Cloud Function — Firestore alone has no disconnect callback.
+- **Voice/video calling** is out of scope for a pure client + Firestore app —
+  it needs a WebRTC signaling layer (Firestore can act as the signaling
+  channel) plus TURN/STUN servers; this is a natural next feature to layer
+  on top of the existing chat/message modules.
+- **Push notifications** can be added with Firebase Cloud Messaging: store
+  an FCM token on the user doc and trigger sends from a Cloud Function on
+  new-message writes.
+- **Message search** currently filters the chat list client-side; for
+  full-text search across message history, pair Firestore with an external
+  index (e.g., Algolia or Typesense) synced via Cloud Functions.
