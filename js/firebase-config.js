@@ -26,14 +26,13 @@ import {
 // REPLACE WITH YOUR OWN FIREBASE PROJECT CREDENTIALS
 // -----------------------------------------------------------------------
 const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_PROJECT_ID.appspot.com",
-  messagingSenderId: "YOUR_SENDER_ID",
-  appId: "YOUR_APP_ID",
-};
-
+  apiKey: "AIzaSyC3ZKnpBnXZlGihzeO3_SQgNt-1d80bI1o",
+  authDomain: "photo-6ecf2.firebaseapp.com",
+  projectId: "photo-6ecf2",
+  storageBucket: "photo-6ecf2.firebasestorage.app",
+  messagingSenderId: "467388659086",
+  appId: "1:467388659086:web:43eb2fe0050b26adcce0df",
+  measurementId: "G-92DMR9LX63"
 // Toggle to true only for local development with the Firebase Emulator Suite
 const USE_EMULATORS = false;
 
