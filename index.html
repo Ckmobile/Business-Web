@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#0b141a">
+  <title>WhatsApp Web — Firebase Edition</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <div id="auth-screen" class="auth-screen">
+    <div class="auth-card">
+      <div class="brand-mark">◔</div>
+      <h1>WhatsApp Web</h1>
+      <p>Secure messaging powered by Firebase.</p>
+      <button id="google-login" class="primary-btn">Continue with Google</button>
+      <div class="auth-divider"><span>or</span></div>
+      <form id="email-auth-form">
+        <input id="email" type="email" placeholder="Email address" required>
+        <input id="password" type="password" placeholder="Password" minlength="6" required>
+        <div class="auth-actions">
+          <button class="primary-btn" type="submit">Sign in</button>
+          <button id="signup" class="ghost-btn" type="button">Create account</button>
+        </div>
+      </form>
+      <small>Enable Google/Email providers in Firebase Authentication.</small>
+    </div>
+  </div>
+
+  <main id="app" class="app-shell hidden">
+    <aside class="sidebar">
+      <header class="sidebar-header">
+        <div class="avatar" id="me-avatar">?</div>
+        <div class="me-copy">
+          <strong id="me-name">User</strong>
+          <span id="me-status">online</span>
+        </div>
+        <div class="header-icons">
+          <button id="status-btn" title="Status">◌</button>
+          <button id="new-chat-btn" title="New chat">＋</button>
+          <button id="menu-btn" title="Menu">⋮</button>
+        </div>
+      </header>
+
+      <div class="search-wrap">
+        <input id="chat-search" placeholder="Search or start new chat">
+      </div>
+
+      <nav class="tabs" aria-label="Inbox filters">
+        <button class="active" data-filter="all">All</button>
+        <button data-filter="unread">Unread</button>
+        <button data-filter="groups">Groups</button>
+      </nav>
+
+      <section id="chat-list" class="chat-list"></section>
+      <div class="sidebar-footer">
+        <button id="logout-btn" class="ghost-btn">Log out</button>
+      </div>
+    </aside>
+
+    <section class="conversation">
+      <header class="conversation-header">
+        <button id="back-btn" class="mobile-only">‹</button>
+        <div class="avatar" id="peer-avatar">?</div>
+        <div class="peer-copy">
+          <strong id="peer-name">Select a chat</strong>
+          <span id="peer-presence">Select a conversation</span>
+        </div>
+        <div class="conversation-tools">
+          <button id="video-call" title="Video call">▣</button>
+          <button id="audio-call" title="Audio call">◉</button>
+          <button id="conversation-search" title="Search in conversation">⌕</button>
+          <button id="conversation-menu" title="More">⋮</button>
+        </div>
+      </header>
+
+      <div id="messages" class="messages">
+        <div class="empty-state">
+          <div class="empty-icon">⌁</div>
+          <h2>Private messaging</h2>
+          <p>Select a chat to start sending messages. Messages are stored in Firestore and media in Firebase Storage.</p>
+        </div>
+      </div>
+
+      <div id="reply-preview" class="reply-preview hidden">
+        <div><b id="reply-author">Reply</b><span id="reply-text"></span></div>
+        <button id="cancel-reply">×</button>
+      </div>
+
+      <form id="composer" class="composer">
+        <button type="button" id="emoji-btn" title="Emoji">☺</button>
+        <button type="button" id="attach-btn" title="Attach">⌕</button>
+        <input id="message-input" autocomplete="off" placeholder="Type a message" disabled>
+        <input id="file-input" type="file" hidden multiple accept="image/*,video/*,audio/*,.pdf,.doc,.docx,.xls,.xlsx,.zip">
+        <button type="submit" class="send-btn" title="Send">➤</button>
+      </form>
+    </section>
+
+    <aside id="details-panel" class="details-panel hidden">
+      <header><button id="close-details">×</button><h3>Chat details</h3></header>
+      <div class="details-profile">
+        <div class="avatar large" id="details-avatar">?</div>
+        <h2 id="details-name">Contact</h2>
+        <p id="details-about">About</p>
+      </div>
+      <div class="details-section">
+        <button id="media-btn">Media, links and docs</button>
+        <button id="starred-btn">Starred messages</button>
+        <button id="mute-btn">Mute notifications</button>
+        <button id="block-btn" class="danger">Block contact</button>
+      </div>
+    </aside>
+  </main>
+
+  <div id="toast" class="toast"></div>
+
+  <script type="module" src="./app.js"></script>
+</body>
+</html>
