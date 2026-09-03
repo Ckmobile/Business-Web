@@ -1,0 +1,907 @@
+<!DOCTYPE html>
+<html lang="si">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Settings - RASHU V5</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #030303;
+            --surface: #0a0a0c;
+            --surface-hover: #121216;
+            --border: #16161c;
+            --neon: #00f2ff;
+            --neon-glow: rgba(0, 242, 255, 0.4);
+            --neon-secondary: #ff007f;
+            --neon-sec-glow: rgba(255, 0, 127, 0.4);
+            --text: #ffffff;
+            --muted: #6e6e7e;
+            --success: #00ff66;
+            --error: #ff3344;
+            --card-padding: 24px;
+        }
+
+        body.light-mode {
+            --bg: #f8f9fa;
+            --surface: #ffffff;
+            --surface-hover: #f1f3f5;
+            --border: #dee2e6;
+            --neon: #0066cc;
+            --neon-glow: rgba(0, 102, 204, 0.2);
+            --neon-secondary: #d63384;
+            --neon-sec-glow: rgba(214, 51, 132, 0.2);
+            --text: #212529;
+            --muted: #6c757d;
+        }
+
+        * {
+            margin: 0; padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Inter', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            transition: background 0.3s ease, color 0.3s ease;
+        }
+
+        /* Ambient background glow */
+        .bg-glow {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            z-index: -1;
+            background: radial-gradient(circle at 10% 20%, rgba(0, 242, 255, 0.03) 0%, transparent 40%),
+                        radial-gradient(circle at 90% 80%, rgba(255, 0, 127, 0.02) 0%, transparent 40%);
+            pointer-events: none;
+        }
+
+        header {
+            border-bottom: 1px solid var(--border);
+            background: rgba(10, 10, 12, 0.8);
+            backdrop-filter: blur(12px);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            padding: 15px 30px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .logo {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--neon);
+            text-shadow: 0 0 10px var(--neon-glow);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        .header-controls {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .btn-sm {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text);
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            font-family: 'JetBrains Mono', monospace;
+            transition: 0.3s;
+        }
+
+        .btn-sm:hover {
+            border-color: var(--neon);
+            color: var(--neon);
+            box-shadow: 0 0 10px var(--neon-glow);
+        }
+
+        .btn-logout {
+            border-color: var(--neon-secondary);
+            color: var(--neon-secondary);
+        }
+
+        .btn-logout:hover {
+            background: var(--neon-secondary);
+            color: #000;
+            box-shadow: 0 0 10px var(--neon-sec-glow);
+        }
+
+        main {
+            flex: 1;
+            max-width: 1200px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 40px 20px;
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            gap: 30px;
+        }
+
+        @media (max-width: 900px) {
+            main {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Sidebar Navigation */
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .sidebar-title {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 10px;
+            padding-left: 10px;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            border-radius: 8px;
+            color: var(--muted);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.9rem;
+            transition: 0.2s;
+            background: transparent;
+            border: none;
+            width: 100%;
+            text-align: left;
+            cursor: pointer;
+        }
+
+        .nav-item:hover, .nav-item.active {
+            color: var(--neon);
+            background: var(--surface-hover);
+        }
+
+        .nav-item.active {
+            border-left: 3px solid var(--neon);
+        }
+
+        /* Settings Panels */
+        .settings-content {
+            display: flex;
+            flex-direction: column;
+            gap: 35px;
+        }
+
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: var(--card-padding);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            display: none;
+            animation: fadeIn 0.4s ease forwards;
+        }
+
+        .card.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .card-header {
+            margin-bottom: 25px;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 15px;
+        }
+
+        .card-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .card-subtitle {
+            font-size: 0.85rem;
+            color: var(--muted);
+            margin-top: 5px;
+        }
+
+        /* Form Controls */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        @media (max-width: 600px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 500;
+            margin-bottom: 8px;
+            color: var(--text);
+        }
+
+        input[type="text"], input[type="number"], input[type="password"], select {
+            width: 100%;
+            background: rgba(255,255,255,0.02);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text);
+            padding: 12px 15px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.95rem;
+            outline: none;
+            transition: 0.3s;
+        }
+
+        input[type="text"]:focus, input[type="number"]:focus, input[type="password"]:focus, select:focus {
+            border-color: var(--neon);
+            box-shadow: 0 0 10px var(--neon-glow);
+            background: rgba(255,255,255,0.04);
+        }
+
+        /* Switch Toggles */
+        .toggle-group {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.02);
+        }
+
+        .toggle-label {
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+        }
+
+        .toggle-title {
+            font-size: 0.95rem;
+            font-weight: 500;
+        }
+
+        .toggle-desc {
+            font-size: 0.8rem;
+            color: var(--muted);
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 26px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: var(--border);
+            transition: .3s;
+            border-radius: 34px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 18px; width: 18px;
+            left: 4px; bottom: 4px;
+            background-color: white;
+            transition: .3s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: var(--neon);
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(24px);
+        }
+
+        /* Save Button */
+        .btn-save-container {
+            position: sticky;
+            bottom: 20px;
+            display: flex;
+            justify-content: flex-end;
+            z-index: 5;
+        }
+
+        .btn-save {
+            background: var(--neon);
+            color: #000;
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 700;
+            padding: 15px 40px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            box-shadow: 0 10px 20px var(--neon-glow);
+            transition: 0.3s;
+        }
+
+        .btn-save:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 25px var(--neon-glow);
+            filter: brightness(1.1);
+        }
+
+        /* Google Sync Card custom elements */
+        .google-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 12px;
+            border-radius: 50px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            background: rgba(255, 255, 255, 0.05);
+            margin-bottom: 20px;
+        }
+
+        .google-status.connected {
+            color: var(--success);
+            background: rgba(0, 255, 102, 0.1);
+        }
+
+        .google-status.disconnected {
+            color: var(--error);
+            background: rgba(255, 51, 68, 0.1);
+        }
+
+        .btn-google {
+            background: #ffffff;
+            color: #000000;
+            font-family: 'Inter', sans-serif;
+            font-weight: 600;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: 0.3s;
+        }
+
+        .btn-google:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255,255,255,0.2);
+        }
+
+        /* Toast notifications */
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: var(--surface);
+            border: 1px solid var(--neon);
+            box-shadow: 0 10px 30px var(--neon-glow);
+            color: #fff;
+            padding: 15px 30px;
+            border-radius: 8px;
+            z-index: 1000;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9rem;
+            transition: 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            opacity: 0;
+        }
+
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+
+<div class="bg-glow"></div>
+
+<header>
+    <div class="logo">𝗤𝗨𝗘𝗘𝗡 𝗥𝗔𝗦𝗛𝗨 𝗩𝟱</div>
+    <div class="header-controls">
+        <span id="activeBotsDisplay" style="font-size: 0.8rem; font-family: 'JetBrains Mono', monospace; color: var(--success); margin-right: 15px; border: 1px solid var(--success); padding: 4px 8px; border-radius: 4px; display: inline-block;">Active Bots: Loading...</span>
+        <span id="sessionDisplay" style="font-size: 0.8rem; font-family: 'JetBrains Mono', monospace; color: var(--muted)">Session: Loading...</span>
+        <button class="btn-sm" onclick="toggleTheme()">𝐌𝐎𝐃𝐄 🌓</button>
+        <button class="btn-sm btn-logout" onclick="handleLogout()">𝐋𝐎𝐆𝐎𝐔𝐓 🔓</button>
+    </div>
+</header>
+
+<main>
+    <div class="sidebar">
+        <div class="sidebar-title">Configuration</div>
+        <button class="nav-item active" onclick="switchTab('general', this)">⚙️ General Settings</button>
+        <button class="nav-item" onclick="switchTab('automation', this)">⚡ Automation & Bio</button>
+        <button class="nav-item" onclick="switchTab('automsg', this)">💬 Message & React</button>
+        <button class="nav-item" onclick="switchTab('security', this)">🛡️ Group & Security</button>
+        <button class="nav-item" onclick="switchTab('google', this)">📧 Google Sync (Auto Save)</button>
+    </div>
+
+    <div class="settings-content">
+        <!-- GENERAL SETTINGS -->
+        <div class="card active" id="tab-general">
+            <div class="card-header">
+                <div class="card-title">General Settings</div>
+                <div class="card-subtitle">Basic bot properties and operational modes</div>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Bot Display Name</label>
+                    <input type="text" id="BOT_NAME" placeholder="e.g. QUEEN RASHU">
+                </div>
+                <div class="form-group">
+                    <label>Command Prefix</label>
+                    <input type="text" id="PREFIX" placeholder="e.g. .">
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Owner Phone Number</label>
+                    <input type="text" id="OWNER_NUMBER" placeholder="e.g. 947XXXXXXXX">
+                </div>
+                <div class="form-group">
+                    <label>Work Type / Visibility</label>
+                    <select id="WORK_TYPE">
+                        <option value="public">Public (Everyone can use)</option>
+                        <option value="private">Private (Only Owner can use)</option>
+                        <option value="groups">Groups Only (Inbox ignored)</option>
+                        <option value="inbox">Inbox Only (Groups ignored)</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- AUTOMATION & BIO -->
+        <div class="card" id="tab-automation">
+            <div class="card-header">
+                <div class="card-title">Automation & Presence</div>
+                <div class="card-subtitle">Presence states and status broadcast automations</div>
+            </div>
+
+            <div class="toggle-group">
+                <div class="toggle-label">
+                    <div class="toggle-title">Always Online</div>
+                    <div class="toggle-desc">Show as available on WhatsApp at all times</div>
+                </div>
+                <label class="switch">
+                    <input type="checkbox" id="ALWAYS_ONLINE">
+                    <span class="slider"></span>
+                </label>
+            </div>
+
+            <div class="toggle-group">
+                <div class="toggle-label">
+                    <div class="toggle-title">Always Offline</div>
+                    <div class="toggle-desc">Force WhatsApp state to show as unavailable</div>
+                </div>
+                <label class="switch">
+                    <input type="checkbox" id="ALWAYS_OFFLINE">
+                    <span class="slider"></span>
+                </label>
+            </div>
+
+            <div class="toggle-group">
+                <div class="toggle-label">
+                    <div class="toggle-title">Auto Typing</div>
+                    <div class="toggle-desc">Trigger typing indicator when processing messages</div>
+                </div>
+                <label class="switch">
+                    <input type="checkbox" id="AUTO_TYPING">
+                    <span class="slider"></span>
+                </label>
+            </div>
+
+            <div class="toggle-group">
+                <div class="toggle-label">
+                    <div class="toggle-title">Auto Recording</div>
+                    <div class="toggle-desc">Trigger audio recording indicator when processing messages</div>
+                </div>
+                <label class="switch">
+                    <input type="checkbox" id="AUTO_RECORDING">
+                    <span class="slider"></span>
+                </label>
+            </div>
+
+            <div class="toggle-group">
+                <div class="toggle-label">
+                    <div class="toggle-title">Auto Update Bio</div>
+                    <div class="toggle-desc">Keep bot runtime dynamic bio status updated</div>
+                </div>
+                <label class="switch">
+                    <input type="checkbox" id="AUTO_BIO">
+                    <span class="slider"></span>
+                </label>
+            </div>
+
+            <div style="margin-top: 25px; border-top: 1px solid var(--border); padding-top: 20px;">
+                <h4 style="margin-bottom: 15px;">Status (Story) Broadcast Options</h4>
+                
+                <div class="toggle-group">
+                    <div class="toggle-label">
+                        <div class="toggle-title">Auto View Status</div>
+                        <div class="toggle-desc">Automatically read viewed statuses</div>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" id="AUTO_VIEW_STATUS">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+
+                <div class="toggle-group">
+                    <div class="toggle-label">
+                        <div class="toggle-title">Auto Like Status</div>
+                        <div class="toggle-desc">React with emoji to statuses</div>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" id="AUTO_LIKE_STATUS">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+
+                <div class="form-group" style="margin-top: 15px;">
+                    <label>Status React Emojis (comma separated)</label>
+                    <input type="text" id="AUTO_LIKE_EMOJI" placeholder="❤️,🔥,👍,😂,😮">
+                </div>
+            </div>
+        </div>
+
+        <!-- MESSAGE & REACT -->
+        <div class="card" id="tab-automsg">
+            <div class="card-header">
+                <div class="card-title">Message Controls & Reactions</div>
+                <div class="card-subtitle">General message reads and auto-react rules</div>
+            </div>
+
+            <div class="toggle-group">
+                <div class="toggle-label">
+                    <div class="toggle-title">Auto Read Messages</div>
+                    <div class="toggle-desc">Automatically mark all incoming messages as read</div>
+                </div>
+                <label class="switch">
+                    <input type="checkbox" id="AUTO_READ">
+                    <span class="slider"></span>
+                </label>
+            </div>
+
+            <div class="toggle-group">
+                <div class="toggle-label">
+                    <div class="toggle-title">Read Command Only</div>
+                    <div class="toggle-desc">Only mark prefix-based commands as read</div>
+                </div>
+                <label class="switch">
+                    <input type="checkbox" id="READ_CMD_ONLY">
+                    <span class="slider"></span>
+                </label>
+            </div>
+
+            <div class="toggle-group">
+                <div class="toggle-label">
+                    <div class="toggle-title">Auto React to Messages</div>
+                    <div class="toggle-desc">Automatically react to chat messages with random emojis</div>
+                </div>
+                <label class="switch">
+                    <input type="checkbox" id="AUTO_REACT">
+                    <span class="slider"></span>
+                </label>
+            </div>
+
+            <div class="form-group" style="margin-top: 15px;">
+                <label>Message React Emojis (comma separated)</label>
+                <input type="text" id="REACT_EMOJIS" placeholder="❤️,💕,😻,🧡,💛,💚,💙">
+            </div>
+
+            <div style="margin-top: 25px; border-top: 1px solid var(--border); padding-top: 20px;">
+                <div class="form-group">
+                    <label>Anti-Delete Mode</label>
+                    <select id="ANTI_DELETE">
+                        <option value="off">Disabled (Messages deleted permanently)</option>
+                        <option value="me">Notify Me (Resend deleted messages to owner inbox)</option>
+                        <option value="public">Public (Resend deleted messages to the chat)</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECURITY & CONTROLS -->
+        <div class="card" id="tab-security">
+            <div class="card-header">
+                <div class="card-title">Group Security & Moderation</div>
+                <div class="card-subtitle">Enable shield protections for groups</div>
+            </div>
+
+            <div class="toggle-group">
+                <div class="toggle-label">
+                    <div class="toggle-title">Anti-Bot Protection</div>
+                    <div class="toggle-desc">Remove other automated bots detected in groups</div>
+                </div>
+                <label class="switch">
+                    <input type="checkbox" id="ANTI_BOT">
+                    <span class="slider"></span>
+                </label>
+            </div>
+
+            <div class="toggle-group">
+                <div class="toggle-label">
+                    <div class="toggle-title">Anti-Bad Words Filter</div>
+                    <div class="toggle-desc">Delete bad words and warn/kick members</div>
+                </div>
+                <label class="switch">
+                    <input type="checkbox" id="ANTI_BAD">
+                    <span class="slider"></span>
+                </label>
+            </div>
+
+            <div class="toggle-group">
+                <div class="toggle-label">
+                    <div class="toggle-title">Anti-Link Filter</div>
+                    <div class="toggle-desc">Remove WhatsApp group links and invite spammers</div>
+                </div>
+                <label class="switch">
+                    <input type="checkbox" id="ANTI_LINK">
+                    <span class="slider"></span>
+                </label>
+            </div>
+
+            <div style="margin-top: 25px; border-top: 1px solid var(--border); padding-top: 20px;">
+                <div class="form-group">
+                    <label>Newsletter JID</label>
+                    <input type="text" id="NEWSLETTER_JID" placeholder="e.g. 1203XXXXXXXXXXXXXXXXX@newsletter">
+                </div>
+                <div class="form-group">
+                    <label>Group Invite Link</label>
+                    <input type="text" id="GROUP_INVITE_LINK" placeholder="https://chat.whatsapp.com/...">
+                </div>
+            </div>
+        </div>
+
+        <!-- GOOGLE CONTACT SYNC -->
+        <div class="card" id="tab-google">
+            <div class="card-header">
+                <div class="card-title">Google Contacts Synchronization</div>
+                <div class="card-subtitle">Automatically backup WhatsApp chat numbers to Google Contacts</div>
+            </div>
+
+            <div id="googleConnectionStatus" class="google-status disconnected">
+                Google Contacts: Disconnected 🔴
+            </div>
+
+            <div class="form-group">
+                <label>Auto Save Mode</label>
+                <select id="AUTO_SAVE_CONTACTS">
+                    <option value="off">Off (Disable auto saving)</option>
+                    <option value="auto">Auto (Silently save using WhatsApp name)</option>
+                    <option value="ask">Ask (Prompt user for name in inbox and save)</option>
+                </select>
+            </div>
+
+            <div id="googleCredentialsBlock" style="margin-top: 20px; border-top: 1px solid var(--border); padding-top: 20px;">
+                <h4 style="margin-bottom: 15px;">Google API Credentials (OAuth2)</h4>
+                <div class="form-group">
+                    <label>Google Client ID</label>
+                    <input type="text" id="GOOGLE_CLIENT_ID" placeholder="Enter Google Client ID">
+                </div>
+                <div class="form-group">
+                    <label>Google Client Secret</label>
+                    <input type="password" id="GOOGLE_CLIENT_SECRET" placeholder="Enter Google Client Secret">
+                </div>
+                <div class="form-group">
+                    <label>Google Redirect URI</label>
+                    <input type="text" id="GOOGLE_REDIRECT_URI" placeholder="http://localhost:3000/auth/google/callback" readonly>
+                </div>
+
+                <button class="btn-google" onclick="authenticateGoogle()">
+                    <svg width="18" height="18" viewBox="0 0 18 18">
+                        <path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.874 2.684-6.615z" fill="#4285F4"/>
+                        <path d="M9 18c2.43 0 4.467-.806 5.956-2.184l-2.908-2.258c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332C2.438 15.983 5.482 18 9 18z" fill="#34A853"/>
+                        <path d="M3.964 10.707c-.18-.54-.282-1.117-.282-1.707s.102-1.167.282-1.707V4.961H.957C.347 6.173 0 7.548 0 9s.347 2.827.957 4.039l3.007-2.332z" fill="#FBBC05"/>
+                        <path d="M9 3.579c1.32 0 2.507.454 3.44 1.35l2.58-2.58C13.463.892 11.426 0 9 0 5.482 0 2.438 2.017.957 4.961L3.964 7.293C4.672 5.166 6.656 3.579 9 3.579z" fill="#EA4335"/>
+                    </svg>
+                    Link with Google Account
+                </button>
+            </div>
+        </div>
+
+        <div class="btn-save-container">
+            <button class="btn-save" onclick="saveSettings()">𝐒𝐀𝐕𝐄 𝐂𝐎𝐍𝐅𝐈𝐆𝐔𝐑𝐀𝐓𝐈𝐎𝐍 💾</button>
+        </div>
+    </div>
+</main>
+
+<div class="toast" id="toast">Settings Saved Successfully!</div>
+
+<script>
+    // Auth Validation
+    const token = localStorage.getItem('dashboard_token');
+    const type = localStorage.getItem('dashboard_type');
+    const number = localStorage.getItem('dashboard_number');
+
+    if (!token) {
+        window.location.href = '/login.html';
+    }
+
+    // Set header session text
+    document.getElementById('sessionDisplay').innerText = `Type: ${type.toUpperCase()} ${number ? '(' + number + ')' : ''}`;
+
+    if (type !== 'global') {
+        const credBlock = document.getElementById('googleCredentialsBlock');
+        if (credBlock) credBlock.style.display = 'none';
+    }
+
+    // Switch Tabs
+    function switchTab(tabId, el) {
+        document.querySelectorAll('.card').forEach(c => c.classList.remove('active'));
+        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+        
+        document.getElementById(`tab-${tabId}`).classList.add('active');
+        el.classList.add('active');
+    }
+
+    // Fetch Config on Load
+    let originalConfig = {};
+    async function loadConfig() {
+        try {
+            const url = number ? `/api/config?number=${number}` : '/api/config';
+            const response = await fetch(url, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (response.status === 401 || response.status === 403) {
+                handleLogout();
+                return;
+            }
+            const data = await response.json();
+            originalConfig = data.config;
+
+            // Fill Form Values
+            fillInputs(data.config);
+            
+            // Auto detect redirect URI
+            document.getElementById('GOOGLE_REDIRECT_URI').value = window.location.origin + '/auth/google/callback';
+            
+            // Set active bot count
+            document.getElementById('activeBotsDisplay').innerText = `Active Bots: ${data.activeBotCount || 0}`;
+
+            // Google login status
+            const gStatus = document.getElementById('googleConnectionStatus');
+            if (data.googleAuthActive) {
+                gStatus.innerText = "Google Contacts: Connected ✅";
+                gStatus.className = "google-status connected";
+            } else {
+                gStatus.innerText = "Google Contacts: Disconnected 🔴";
+                gStatus.className = "google-status disconnected";
+            }
+        } catch (err) {
+            showToast('Failed to load settings!');
+        }
+    }
+
+    function fillInputs(conf) {
+        for (const key in conf) {
+            const el = document.getElementById(key);
+            if (!el) continue;
+
+            if (el.type === 'checkbox') {
+                el.checked = String(conf[key]) === 'true' || conf[key] === true;
+            } else if (Array.isArray(conf[key])) {
+                el.value = conf[key].join(',');
+            } else {
+                el.value = conf[key];
+            }
+        }
+    }
+
+    // Save Settings
+    async function saveSettings() {
+        const configData = {};
+        
+        // Loop and build save object from form
+        const inputs = document.querySelectorAll('input, select');
+        inputs.forEach(input => {
+            if (!input.id) return;
+            
+            if (input.type === 'checkbox') {
+                configData[input.id] = input.checked;
+            } else if (input.id === 'REACT_EMOJIS' || input.id === 'AUTO_LIKE_EMOJI') {
+                configData[input.id] = input.value.split(',').map(e => e.trim()).filter(e => e);
+            } else if (input.type === 'number') {
+                configData[input.id] = Number(input.value);
+            } else {
+                configData[input.id] = input.value;
+            }
+        });
+
+        try {
+            const bodyPayload = { configData };
+            if (number) bodyPayload.number = number;
+
+            const response = await fetch('/api/config', {
+                method: 'POST',
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify(bodyPayload)
+            });
+
+            const data = await response.json();
+            if (response.ok) {
+                showToast(data.message || 'Config saved successfully!');
+                // Reload config to update Google auth status
+                setTimeout(loadConfig, 1000);
+            } else {
+                showToast(data.error || 'Failed to save config.');
+            }
+        } catch (err) {
+            showToast('Network error, failed to save.');
+        }
+    }
+
+    // Redirect to OAuth
+    async function authenticateGoogle() {
+        // Save current settings first to persist Client ID/Secret
+        await saveSettings();
+        window.location.href = '/auth/google';
+    }
+
+    function showToast(msg) {
+        const toast = document.getElementById('toast');
+        toast.innerText = msg;
+        toast.classList.add('show');
+        setTimeout(() => toast.classList.remove('show'), 3000);
+    }
+
+    function handleLogout() {
+        localStorage.removeItem('dashboard_token');
+        localStorage.removeItem('dashboard_type');
+        localStorage.removeItem('dashboard_number');
+        window.location.href = '/login.html';
+    }
+
+    function toggleTheme() {
+        document.body.classList.toggle('light-mode');
+    }
+
+    // Initial Load
+    loadConfig();
+</script>
+
+</body>
+</html>

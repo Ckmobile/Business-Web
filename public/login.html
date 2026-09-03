@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="si">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Login - RASHU V5</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #050505;
+            --surface: #0d0d0d;
+            --border: #1a1a1a;
+            --neon: #00f2ff; /* Cyan Neon */
+            --neon-glow: rgba(0, 242, 255, 0.5);
+            --text: #ffffff;
+            --muted: #888888;
+            --error: #ff3e3e;
+        }
+
+        body.light-mode {
+            --bg: #ffffff;
+            --surface: #f5f5f5;
+            --border: #dddddd;
+            --neon: #000000;
+            --neon-glow: rgba(0, 0, 0, 0.2);
+            --text: #000000;
+            --muted: #666666;
+        }
+
+        * {
+            margin: 0; padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Inter', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            transition: background 0.5s ease;
+        }
+
+        .bg-animate {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            z-index: -1;
+            background: radial-gradient(circle at 50% 50%, #111 0%, #000 100%);
+            overflow: hidden;
+        }
+        
+        .blob {
+            position: absolute;
+            width: 300px; height: 300px;
+            background: var(--neon);
+            filter: blur(80px);
+            border-radius: 50%;
+            opacity: 0.05;
+            animation: move 20s infinite alternate;
+        }
+
+        @keyframes move {
+            from { transform: translate(-10%, -10%); }
+            to { transform: translate(110%, 110%); }
+        }
+
+        .container {
+            position: relative;
+            z-index: 1;
+            width: 100%;
+            max-width: 420px;
+            padding: 20px;
+            animation: fadeInScale 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        @keyframes fadeInScale {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .brand {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .brand h1 {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.8rem;
+            letter-spacing: 6px;
+            text-transform: uppercase;
+            color: var(--neon);
+            text-shadow: 0 0 15px var(--neon-glow);
+            animation: flicker 3s infinite;
+        }
+
+        @keyframes flicker {
+            0%, 18%, 22%, 25%, 53%, 57%, 100% { text-shadow: 0 0 15px var(--neon-glow); }
+            20%, 24%, 55% { text-shadow: none; opacity: 0.8; }
+        }
+
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 40px 30px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+            transition: all 0.4s ease;
+        }
+
+        .card:focus-within {
+            border-color: var(--neon);
+            box-shadow: 0 0 30px rgba(0, 242, 255, 0.15);
+        }
+
+        .label {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            color: var(--neon);
+            margin-bottom: 8px;
+            display: block;
+            letter-spacing: 1px;
+        }
+
+        .input-wrapper {
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        input {
+            width: 100%;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.1rem;
+            padding: 15px;
+            outline: none;
+            transition: 0.3s;
+        }
+
+        input:focus {
+            background: rgba(255,255,255,0.05);
+            border-color: var(--neon);
+        }
+
+        .btn {
+            width: 100%;
+            background: var(--neon);
+            color: #000;
+            border: none;
+            padding: 18px;
+            border-radius: 8px;
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 800;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            margin-bottom: 15px;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px var(--neon-glow);
+            filter: brightness(1.1);
+        }
+
+        .btn:active { transform: translateY(0); }
+
+        .loader {
+            width: 18px; height: 18px;
+            border: 3px solid #000;
+            border-top: 3px solid transparent;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            display: inline-block;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .result {
+            margin-top: 20px;
+            display: none;
+        }
+
+        .result.show { 
+            display: block; 
+            animation: slideIn 0.5s ease forwards;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            font-size: 0.65rem;
+            letter-spacing: 4px;
+            color: var(--muted);
+            opacity: 0.6;
+        }
+
+        .floating-controls {
+            position: fixed;
+            top: 25px;
+            right: 25px;
+            display: flex;
+            gap: 15px;
+            z-index: 100;
+        }
+
+        .f-btn {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            color: var(--text);
+            padding: 10px 15px;
+            border-radius: 50px;
+            font-size: 0.7rem;
+            cursor: pointer;
+            backdrop-filter: blur(10px);
+            transition: 0.3s;
+        }
+
+        .f-btn:hover { border-color: var(--neon); color: var(--neon); }
+
+        .back-link {
+            text-align: center;
+            margin-top: 15px;
+        }
+        
+        .back-link a {
+            color: var(--muted);
+            font-size: 0.8rem;
+            text-decoration: none;
+            font-family: 'JetBrains Mono', monospace;
+            transition: 0.3s;
+        }
+
+        .back-link a:hover {
+            color: var(--neon);
+        }
+    </style>
+</head>
+<body>
+
+<div class="bg-animate">
+    <div class="blob"></div>
+</div>
+
+<div class="floating-controls">
+    <button class="f-btn" onclick="toggleTheme()">𝐌𝐎𝐃𝐄 🌓</button>
+</div>
+
+<div class="container">
+    <div class="brand">
+        <h1>𝐑𝐀𝐒𝐇𝐔 𝐏𝐀𝐍𝐄𝐋</h1>
+        <div style="font-size: 0.6rem; color: var(--muted); margin-top: 10px; letter-spacing: 3px;">
+            𝐃𝐀𝐒𝐇𝐁𝐎𝐀𝐑𝐃 𝐋𝐎𝐆𝐈𝐍 🔐
+        </div>
+    </div>
+
+    <div class="card">
+        <form id="loginForm" onsubmit="handleLogin(event)">
+            <label class="label">𝐁𝐎𝐓 𝐏𝐇𝐎𝐍𝐄 𝐍𝐔𝐌𝐁𝐄𝐑</label>
+            <div class="input-wrapper">
+                <input type="text" id="phoneInput" placeholder="947XXXXXXXX or 'global'" required>
+            </div>
+
+            <label class="label">𝐃𝐀𝐒𝐇𝐁𝐎𝐀𝐑𝐃 𝐏𝐀𝐒𝐒𝐖𝐎𝐑𝐃</label>
+            <div class="input-wrapper">
+                <input type="password" id="passwordInput" placeholder="Enter Password" required>
+            </div>
+
+            <button type="submit" class="btn" id="loginBtn">
+                <span id="btnText">𝐋𝐎𝐆𝐈𝐍 𝐓𝐎 𝐃𝐀𝐒𝐇𝐁𝐎𝐀𝐑𝐃</span>
+            </button>
+        </form>
+
+        <div class="result" id="result"></div>
+        
+        <div class="back-link">
+            <a href="/">← Go Back to Pairing</a>
+        </div>
+    </div>
+
+    <div class="footer">𝗣𝗢𝗪𝗘𝗥𝗗 𝗕𝗬 𝗥𝗔𝗦𝗛𝗨 🤍</div>
+</div>
+
+<script>
+    // Check if already logged in, redirect
+    if (localStorage.getItem('dashboard_token')) {
+        window.location.href = '/settings.html';
+    }
+
+    async function handleLogin(e) {
+        e.preventDefault();
+        const number = document.getElementById('phoneInput').value.trim();
+        const password = document.getElementById('passwordInput').value.trim();
+        const btn = document.getElementById('loginBtn');
+        const btnText = document.getElementById('btnText');
+        const resultDiv = document.getElementById('result');
+
+        btn.disabled = true;
+        btnText.innerHTML = '<div class="loader"></div>';
+        resultDiv.classList.remove('show');
+
+        try {
+            const response = await fetch('/api/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ number, password })
+            });
+
+            const data = await response.json();
+
+            if (response.ok && data.success) {
+                localStorage.setItem('dashboard_token', data.token);
+                localStorage.setItem('dashboard_type', data.type);
+                if (data.number) {
+                    localStorage.setItem('dashboard_number', data.number);
+                } else {
+                    localStorage.removeItem('dashboard_number');
+                }
+                
+                resultDiv.innerHTML = `<div style="color: var(--neon); text-align: center; font-size: 0.8rem; border: 1px solid var(--neon); padding: 10px; border-radius: 5px;">Login Successful! Redirecting...</div>`;
+                resultDiv.classList.add('show');
+                
+                setTimeout(() => {
+                    window.location.href = '/settings.html';
+                }, 1000);
+            } else {
+                showError(data.error || 'Invalid credentials');
+            }
+        } catch (err) {
+            showError('Server offline or network error.');
+        } finally {
+            if (!localStorage.getItem('dashboard_token')) {
+                btn.disabled = false;
+                btnText.innerHTML = 'LOGIN TO DASHBOARD';
+            }
+        }
+    }
+
+    function showError(msg) {
+        const resultDiv = document.getElementById('result');
+        resultDiv.innerHTML = `<div style="color: var(--error); text-align: center; font-size: 0.8rem; border: 1px solid var(--error); padding: 10px; border-radius: 5px;">${msg}</div>`;
+        resultDiv.classList.add('show');
+    }
+
+    function toggleTheme() {
+        document.body.classList.toggle('light-mode');
+    }
+</script>
+
+</body>
+</html>
